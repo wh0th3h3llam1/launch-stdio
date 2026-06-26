@@ -191,9 +191,11 @@ export async function produceVoice(script: string): Promise<Produced<string>> {
 
 // Build a short, valid jingle lyric from the brand so minimax-music has the
 // required `lyrics` field even though our brief is product-, not song-, shaped.
+// Kept deliberately short — minimax-music's clip length tracks lyric content,
+// so one tight verse + chorus keeps the bed to ~20s (see MUSIC_SECONDS).
 export function jingleLyrics(plan: Plan): string {
-  const tag = plan.positioning.split(/[.—-]/)[0].trim().slice(0, 80);
-  return `[Verse]\n${plan.brand}, here to lead the way\n${tag}\n[Chorus]\n${plan.brand}, ${plan.brand}, launch today\nMake it happen, light the way`;
+  const tag = plan.positioning.split(/[.—-]/)[0].trim().slice(0, 60);
+  return `[Verse]\n${plan.brand}, lead the way\n[Chorus]\n${plan.brand}, launch today\n${tag}`;
 }
 
 export async function produceMusic(
