@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #08080a;
+  --surface: #101013;
+  --surface-2: #17171c;
+  --line: #2a2a31;
+  --ink: #f4f4ef;
+  --ink-dim: #8c8c84;
+  --acid: #d4f23c; /* signature: live / working / GMI / primary */
+  --coral: #ff5a2c; /* reserved: critic score / revision */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-acid: var(--acid);
+  --color-coral: var(--coral);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Subtle technical grid + corner glow (control-room backdrop) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  height: 60vh;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(212, 242, 60, 0.12), transparent 60%);
+  filter: blur(40px);
+}
+
+.font-display { font-family: var(--font-display), sans-serif; }
+.font-mono { font-family: var(--font-mono), monospace; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.mono-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* Working shimmer */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(212, 242, 60, 0.10), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes pulse-acid {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 242, 60, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(212, 242, 60, 0); }
+}
+.pulse-acid { animation: pulse-acid 1.4s ease-out infinite; }
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-thumb { background: #2a2a31; border-radius: 9999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after, .pulse-acid { animation: none; }
 }

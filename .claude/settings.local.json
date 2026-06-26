@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm install framer-motion@^12.42.0 jszip@^3.10.1 2>&1)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 30; \"=== TSC EXIT: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 20; \"=== TSC EXIT: $LASTEXITCODE ===\")",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 12; \"=== TSC EXIT: $LASTEXITCODE ===\")"
+    ]
+  }
+}

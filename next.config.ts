@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Self-contained server build for the AgentBox Docker container.
+  output: "standalone",
 };
 
 export default nextConfig;
