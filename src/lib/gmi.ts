@@ -6,28 +6,19 @@ import type { Provider } from "./types";
 // app (and the demo) runs with zero keys. This file is the inference backbone.
 // ───────────────────────────────────────────────────────────────────────────
 
-// AgentBox injects GMI_MAAS_API_KEY + GMI_MAAS_BASE_URL; fall back to the
-// developer-local GMI_API_KEY so the app works outside AgentBox too.
+// AgentBox injects GMI_MAAS_API_KEY + GMI_MAAS_LLM_URL; models are auto-selected.
+// Falls back to developer-local GMI_API_KEY so the app works outside AgentBox.
 const GMI_KEY =
   process.env.GMI_MAAS_API_KEY?.trim() ||
   process.env.GMI_API_KEY?.trim() ||
   "";
 
-const _maasBase = process.env.GMI_MAAS_BASE_URL?.trim();
 export const GMI_LLM_URL =
-  process.env.GMI_LLM_URL?.trim() ||
-  (_maasBase ? `${_maasBase}/chat/completions` : null) ||
+  process.env.GMI_MAAS_LLM_URL?.trim() ||
   "https://api.gmi-serving.com/v1/chat/completions";
 export const GMI_IE_URL =
   process.env.GMI_IE_URL?.trim() ||
   "https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests";
-
-const MODELS = {
-  llm: process.env.GMI_LLM_MODEL?.trim() || "deepseek-ai/DeepSeek-V3",
-  image: process.env.GMI_IMAGE_MODEL?.trim() || "seedream-4-0-250828",
-  tts: process.env.GMI_TTS_MODEL?.trim() || "inworld-tts-1.5-mini",
-  music: process.env.GMI_MUSIC_MODEL?.trim() || "minimax-music-2.5",
-};
 
 export const isMock = () => GMI_KEY === "";
 
@@ -90,7 +81,6 @@ export async function gmiChat(
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({
-      model: MODELS.llm,
       messages,
       temperature: opts.temperature ?? 0.8,
       max_tokens: opts.maxTokens ?? 1500,
@@ -109,7 +99,6 @@ export async function gmiChat(
 // Submit a job, then poll until the outcome is ready. Tolerant of both a
 // synchronous outcome on submit and the request-id + poll pattern.
 async function gmiInference(
-  model: string,
   payload: Record<string, unknown>,
   pick: (outcome: Record<string, unknown>) => string | undefined,
   timeoutMs = 90_000
@@ -120,7 +109,7 @@ async function gmiInference(
   const submit = await fetch(GMI_IE_URL, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ model, payload }),
+    body: JSON.stringify({ payload }),
   });
   if (!submit.ok) {
     throw new Error(`GMI IE ${submit.status}: ${await submit.text().catch(() => "")}`);
@@ -167,7 +156,6 @@ export async function gmiImage(
   opts: { size?: string } = {}
 ): Promise<string> {
   return gmiInference(
-    MODELS.image,
     {
       prompt,
       size: opts.size ?? "1024x1024",
@@ -184,7 +172,6 @@ export async function gmiImage(
 
 export async function gmiTts(text: string): Promise<string> {
   return gmiInference(
-    MODELS.tts,
     {
       text,
       voice_id: process.env.GMI_TTS_VOICE?.trim() || "Ashley",
@@ -197,11 +184,8 @@ export async function gmiTts(text: string): Promise<string> {
   );
 }
 
-// minimax-music-2.5 needs `lyrics` (1-3500 chars, supports [Verse]/[Chorus] tags)
-// plus an optional style `prompt`. It's synchronous but slow (~30-110s).
 export async function gmiMusic(style: string, lyrics: string): Promise<string> {
   return gmiInference(
-    MODELS.music,
     {
       lyrics,
       prompt: style,
