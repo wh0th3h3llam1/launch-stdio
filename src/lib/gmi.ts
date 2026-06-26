@@ -6,10 +6,17 @@ import type { Provider } from "./types";
 // app (and the demo) runs with zero keys. This file is the inference backbone.
 // ───────────────────────────────────────────────────────────────────────────
 
-const GMI_KEY = process.env.GMI_API_KEY?.trim() || "";
+// AgentBox injects GMI_MAAS_API_KEY + GMI_MAAS_BASE_URL; fall back to the
+// developer-local GMI_API_KEY so the app works outside AgentBox too.
+const GMI_KEY =
+  process.env.GMI_MAAS_API_KEY?.trim() ||
+  process.env.GMI_API_KEY?.trim() ||
+  "";
 
+const _maasBase = process.env.GMI_MAAS_BASE_URL?.trim();
 export const GMI_LLM_URL =
   process.env.GMI_LLM_URL?.trim() ||
+  (_maasBase ? `${_maasBase}/chat/completions` : null) ||
   "https://api.gmi-serving.com/v1/chat/completions";
 export const GMI_IE_URL =
   process.env.GMI_IE_URL?.trim() ||
